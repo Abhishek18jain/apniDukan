@@ -55,7 +55,7 @@ const BillReviewPopup = ({
     if (!validateItems()) return;
 
     try {
-      await axios.post(`/confirm/${billId}`, { items });
+      await axios.post(`/bill/confirm/${billId}`, { items });
       alert("Items confirmed successfully!");
 
       onClose(); // close popup

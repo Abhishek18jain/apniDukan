@@ -17,20 +17,24 @@ const UploadBill = () => {
 
   // Fetch categories on page load
   useEffect(() => {
-  axiosInstance.get("/category/all")
+    console.log("calling categories")
+  axiosInstance.get("/categories/all")
       .then(res => setCategories(res.data.categories))
       .catch(err => console.log("Category Fetch Error:", err));
   }, []);
 
   // Upload handler
   const handleUpload = async () => {
+    console.log("button clicked")
     if (!file) return alert("Please select a bill before uploading.");
 
     const form = new FormData();
     form.append("bill", file);
 
     try {
-      const res = await axios.post("/upload", form);
+      console.log("biil uploading api called")
+      const res = await axiosInstance.post("/bill/upload", form, { headers: { "Content-Type": "multipart/form-data"}});
+      console.log("ITEMS RECEIVED:", res.data.data);
 
       // Extract from backend
       setItems(res.data.data);        // extracted OCR items
@@ -40,7 +44,8 @@ const UploadBill = () => {
       alert("Bill uploaded successfully! Please review items.");
 
     } catch (error) {
-      console.log(error);
+      console.log("prinitng error", error);
+
       alert("Bill upload failed.");
     }
   };
@@ -56,7 +61,7 @@ const UploadBill = () => {
         onChange={(e) => setFile(e.target.files[0])}
       />
 
-      <button onClick={handleUpload}>Upload</button>
+      <button onClick={handleUpload}>Upload bill</button>
 
       {/* Popup */}
       <BillReviewPopup

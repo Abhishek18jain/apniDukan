@@ -21,6 +21,9 @@ const BaseLayout = () => {
           <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
           <Link to="/inventory" className="hover:text-blue-600">Inventory</Link>
           <Link to="/stocks" className="hover:text-blue-600">Stocks</Link>
+          <Link to="/upload" className="hover:text-blue-600">Upload</Link>
+
+      
           <button
             onClick={handleLogout}
             className="text-red-500 hover:text-red-700 font-semibold"

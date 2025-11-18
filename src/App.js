@@ -9,6 +9,7 @@ import Inventory from "./pages/inventory.jsx"
 import BaseLayout from "./layouts/baseLayout.jsx";
 import ProtectedRoute from "./utlis/protectedRoutes.jsx";
 import InactivePage from "./pages/Inactivepage.jsx";
+import Upload from "./pages/upload.jsx"
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
   <Route path="/dashboard" element={<Dashboard />} />
   <Route path="inventory" element={<Inventory />} />
   <Route path="stocks" element={<InactivePage />} />
+  <Route path="upload" element={<Upload />} />
 
 </Route>
         </Routes>
