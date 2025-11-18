@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const BillReviewPopup = ({
   isOpen,
@@ -24,11 +25,13 @@ const BillReviewPopup = ({
 
   // Validation before confirm
   const validateItems = () => {
+    console.log("validateing")
     const newErrors = [];
 
     items.forEach((item, index) => {
       // 1. cleanName required
       if (!item.cleanName || item.cleanName.trim() === "") {
+        console.log("yajh tak agaya")
         newErrors.push({
           index,
           field: "cleanName",
@@ -36,14 +39,15 @@ const BillReviewPopup = ({
         });
       }
 
-      // 2. category required only if item is NEW
-      if (!item.matchedItemId && !item.categoryId) {
-        newErrors.push({
-          index,
-          field: "categoryId",
-          message: "Please select a category",
-        });
-      }
+      // // 2. category required only if item is NEW
+      // if (!item.matchedItemId && !item.categoryId) {
+      //   console.log("dusre wale mai")
+      //   newErrors.push({
+      //     index,
+      //     field: "categoryId",
+      //     message: "Please select a category",
+      //   });
+      // }
     });
 
     setErrors(newErrors);
@@ -52,18 +56,20 @@ const BillReviewPopup = ({
 
   // Confirm button handler
   const handleConfirm = async () => {
-    if (!validateItems()) return;
-
-    try {
-      await axios.post(`/bill/confirm/${billId}`, { items });
-      alert("Items confirmed successfully!");
+    console.log("button clicked")
+    if (!validateItems()) return toast.error("failed to validate");
+const apiCall = async () =>{console.log("sending to bckend")
+  
+  await axios.post(`/bill/confirm/${billId}`, { items });
+  
+  alert("Items confirmed successfully!");
+  console.log("resApi" , apiCall)
+}
+   
+      apiCall();
 
       onClose(); // close popup
 
-    } catch (error) {
-      console.log(error);
-      alert("Failed to confirm items.");
-    }
   };
 
   return (
@@ -100,7 +106,7 @@ const BillReviewPopup = ({
                 value={item.categoryId || ""}
                 onChange={(e) => handleFieldChange(index, "categoryId", e.target.value)}
               >
-                <option value="">Select Category</option>
+                <option>Select Category</option>
                 {categories.map((c) => (
                   <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
@@ -113,7 +119,8 @@ const BillReviewPopup = ({
           );
         })}
 
-        <button onClick={handleConfirm}>Confirm & Update</button>
+        <button onClick={handleConfirm} > 
+        Confirm & Update</button>
         <button onClick={onClose}>Cancel</button>
 
       </div>

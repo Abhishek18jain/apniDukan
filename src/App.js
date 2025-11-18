@@ -10,6 +10,7 @@ import BaseLayout from "./layouts/baseLayout.jsx";
 import ProtectedRoute from "./utlis/protectedRoutes.jsx";
 import InactivePage from "./pages/Inactivepage.jsx";
 import Upload from "./pages/upload.jsx"
+import BillReviewPage from "./pages/billpage.jsx";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
   <Route path="inventory" element={<Inventory />} />
   <Route path="stocks" element={<InactivePage />} />
   <Route path="upload" element={<Upload />} />
+   <Route path="/review/:billId" element={<BillReviewPage />} />
 
 </Route>
         </Routes>
