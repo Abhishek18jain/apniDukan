@@ -11,6 +11,7 @@ import ProtectedRoute from "./utlis/protectedRoutes.jsx";
 import InactivePage from "./pages/Inactivepage.jsx";
 import Upload from "./pages/upload.jsx"
 import BillReviewPage from "./pages/billpage.jsx";
+import Homepage from "./pages/homepage.jsx";
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
       {/* protectedRoutes */}
-      <Route path="/" element={<ProtectedRoute><BaseLayout /></ProtectedRoute>}>
+      <Route path="/" element={<ProtectedRoute><BaseLayout/></ProtectedRoute>}>
+      <Route index element={<Homepage />} /> 
   <Route path="/dashboard" element={<Dashboard />} />
   <Route path="inventory" element={<Inventory />} />
   <Route path="stocks" element={<InactivePage />} />
