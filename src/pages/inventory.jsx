@@ -5,6 +5,7 @@ import AddItem from "../components/AddItemModel";
 import formatDate from "../utlis/dateFormat";
 
 const Inventory = () => {
+  console.log("called me ")
   // ==============================
   // STATE
   // ==============================
@@ -28,10 +29,14 @@ const Inventory = () => {
   // LOAD ALL ITEMS
   // ==============================
   const loadItems = async () => {
+    console.log("checking")
     setLoading(true);
     try {
       const res = await axiosInstance.get("/inventory/show");
       setItems(res.data.data);
+      console.log(
+        "done"
+      )
     } catch {
       toast.error("Failed to load items");
     } finally {

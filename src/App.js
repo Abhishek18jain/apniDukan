@@ -1,40 +1,42 @@
-import React from "react";
-import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import Login from "./pages/login.jsx"
-import Register from "./pages/register.jsx"
-import Dashboard from "./pages/dashboard.jsx"
-import Inventory from "./pages/inventory.jsx"
+import ProtectedRoute from "./utlis/protectedRoutes";
 import BaseLayout from "./layouts/baseLayout.jsx";
-import ProtectedRoute from "./utlis/protectedRoutes.jsx";
-import InactivePage from "./pages/Inactivepage.jsx";
-import Upload from "./pages/upload.jsx"
-import BillReviewPage from "./pages/billpage.jsx";
-import Homepage from "./pages/homepage.jsx";
+import Homepage from "./pages/homepage";
+import Dashboard from "./pages/dashboard";
+import InventoryPage from "./pages/inventory";
+import InactivePage from "./pages/Inactivepage";
+import Upload from "./pages/upload";
+import BillReviewPage from "./pages/billpage";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 function App() {
   return (
-    <div className="App">
-       <Toaster position="top-right" />
-      <Router>
-        <Routes>
-               {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-      {/* protectedRoutes */}
-      <Route path="/" element={<ProtectedRoute><BaseLayout/></ProtectedRoute>}>
-      <Route index element={<Homepage />} /> 
-  <Route path="/dashboard" element={<Dashboard />} />
-  <Route path="inventory" element={<Inventory />} />
-  <Route path="stocks" element={<InactivePage />} />
-  <Route path="upload" element={<Upload />} />
-   <Route path="/review/:billId" element={<BillReviewPage />} />
+    <Router>
+      <Routes>
+        {/* Public */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-</Route>
-        </Routes>
-      </Router>
-    </div>
+        {/* Layout route - Navbar and other common UI */}
+        <Route path="/" element={<BaseLayout />}>
+          {/* Public homepage (index) inside the layout */}
+          <Route index element={<Homepage />} />
+
+          {/* Protected nested routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="inventory" element={<InventoryPage />} />
+            <Route path="stocks" element={<InactivePage />} />
+            <Route path="upload" element={<Upload />} />
+            <Route path="review/:billId" element={<BillReviewPage />} />
+          </Route>
+        </Route>
+
+        {/* optional: catch-all 404 */}
+        <Route path="*" element={<div>404 Not Found</div>} />
+      </Routes>
+    </Router>
   );
 }
 
