@@ -545,32 +545,7 @@ Get automatic SMS/WhatsApp alerts when an item is about to run out. Set reorder 
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-blue-600 px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Ready to digitize your shop?</h2>
-          <p className="text-xl text-blue-100 mb-8">
-              Watch in 2 minutes how stock gets auto updated by scanning the bill.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => navigate("/upload")}
-              className="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:bg-gray-100 active:scale-95 transition-all duration-300 inline-flex items-center space-x-2"
-            >
-              <UploadCloud className="w-5 h-5" />
-              <span>try Demo</span>
-            </button>
-            <button 
-              onClick={() => navigate("/register")}
-              className="bg-blue-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:bg-blue-800 active:scale-95 transition-all duration-300 inline-flex items-center space-x-2"
-            >
-              <span>Register</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </section>
-
+     
       {/* Footer */}
       <footer className="bg-gray-900 text-white px-6 pt-16 pb-8">
         <div className="max-w-6xl mx-auto">
@@ -633,7 +608,7 @@ Get automatic SMS/WhatsApp alerts when an item is about to run out. Set reorder 
           </div>
         </div>
       </footer>
-    </div>
+    </div>  
   );
 };
 export default Home;

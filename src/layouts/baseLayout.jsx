@@ -9,6 +9,7 @@ const BaseLayout = () => {
       <Navbar />
       <main>
         {/* nested routes will render here */}
+        
         <Outlet></Outlet>
       </main>
     </>

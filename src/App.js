@@ -9,17 +9,21 @@ import Upload from "./pages/upload";
 import BillReviewPage from "./pages/billpage";
 import Login from "./pages/login";
 import Register from "./pages/register";
+import ConatctUs from "./pages/contact.jsx"
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Public */}
+         <Route path="/" element={<BaseLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/contact" element={<ConatctUs />} />
+        
 
         {/* Layout route - Navbar and other common UI */}
-        <Route path="/" element={<BaseLayout />}>
+       
           {/* Public homepage (index) inside the layout */}
           <Route index element={<Homepage />} />
 
