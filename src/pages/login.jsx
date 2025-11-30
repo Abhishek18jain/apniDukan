@@ -89,9 +89,18 @@ const Login = () => {
                 "Login to Your Shop"
               )}
             </button>
-          </form>
+  
 
           {/* Footer */}
+                  </form>
+    <div className="text-center  mt-4">
+              <Link 
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-all duration-200"
+              >
+                Forgot password?
+              </Link>
+            </div>
           <div className="text-center mt-6 pt-6 border-t border-gray-200">
             <p className="text-gray-600">Don't have an account?</p>
             <Link

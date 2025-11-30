@@ -3,9 +3,11 @@ import axiosInstance from "../utlis/axiosinstance";
 import toast from "react-hot-toast";
 import AddItem from "../components/AddItemModel";
 import formatDate from "../utlis/dateFormat";
+import { useNavigate } from "react-router-dom";
+
 
 const Inventory = () => {
-  console.log("called me ")
+
   // ==============================
   // STATE
   // ==============================
@@ -13,6 +15,7 @@ const Inventory = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [activeTick, setActiveTick] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPopup , setShowPopup] = useState(false)
 
   // CATEGORY POPUP (edit/delete)
   const [catPopup, setCatPopup] = useState({ open: false, category: null });
@@ -29,14 +32,12 @@ const Inventory = () => {
   // LOAD ALL ITEMS
   // ==============================
   const loadItems = async () => {
-    console.log("checking")
+
     setLoading(true);
     try {
       const res = await axiosInstance.get("/inventory/show");
       setItems(res.data.data);
-      console.log(
-        "done"
-      )
+     
     } catch {
       toast.error("Failed to load items");
     } finally {
@@ -171,6 +172,23 @@ const Inventory = () => {
       toast.error("Failed to delete item");
     }
   };
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
+  const navigate = useNavigate();
+    const [showLogin, setShowLoginPopup] = useState(false);
+
+  const handleProtectedClick = (path) => {
+    if (!isLoggedIn) {
+      setShowLoginPopup(true);
+    
+    } else {
+      navigate(path);
+      
+    }
+  };
+
+
+
 
   // ==============================
   // RENDER
@@ -188,6 +206,33 @@ const Inventory = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2">
+            {/* POPUP */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-sm text-center">
+
+            <p className="text-lg font-semibold mb-4 text-gray-800">
+              Please login first to access all the features
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Login
+              </button>
+
+              <button
+                onClick={() => setShowLoginPopup(false)}
+                className="px-5 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="mb-4 transform transition-all duration-300">
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
@@ -196,10 +241,24 @@ const Inventory = () => {
         <div className="w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
       </div>
 
+
       {/* Add Item Button */}
-      <div className="flex justify-center mb-3">
-        <AddItem onAdded={loadItems} />
-      </div>
+     <div className="p-6 flex justify-center">
+
+      <button
+        onClick={() => setShowPopup(true)}  
+        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+      >
+        Add Item
+      </button>
+                <button onClick={() => handleProtectedClick("/stocks")} className="bg-blue-600 ml-[1rem] text-white px-4 py-2 rounded-lg hover:bg-blue-700 ">Stocks</button>
+
+      <AddItem
+        show={showPopup}
+        onClose={() => setShowPopup(false)}
+       
+      />
+    </div>
 
       {/* Main Content - Side by Side Columns */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
