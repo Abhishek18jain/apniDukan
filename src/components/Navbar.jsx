@@ -75,7 +75,7 @@ const Navbar = () => {
               <button onClick={() => handleProtectedClick("/inventory")} className="font-medium">Inventory</button>
               <button onClick={() => handleProtectedClick("/stocks")} className="font-medium">Stocks</button>
               <button onClick={() => handleProtectedClick("/customers")} className="font-medium">Transaction</button>
-                <button onClick={() => handleProtectedClick("/bills/create")} className="font-medium">Item-billing</button>
+                <button onClick={() => handleProtectedClick("/bills")} className="font-medium">Item-billing</button>
               <button onClick={() => handleProtectedClick("/upload")} className="font-medium">Bill Upload</button>
               <button onClick={() => handleProtectedClick("/contact")} className="font-medium">Contact Us</button>
             </div>
