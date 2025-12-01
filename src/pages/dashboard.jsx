@@ -1,17 +1,31 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utlis/axiosinstance";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { User, Mail, Store, Package, AlertTriangle, Clock } from "lucide-react";
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
+  const [not7, setNot7] = useState(0);
+  const [not15, setNot15] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
+
       const res = await axiosInstance.get("/profile/dashboard");
+      const items7 = await axiosInstance.get(`/inventory/not-ordered/7`);
+      const items15 = await axiosInstance.get(`/inventory/not-ordered/15`);
+
       setData(res.data);
+      setNot7(items7.data.data.length);
+      setNot15(items15.data.data.length);
+
     } catch (error) {
-      toast.error("Failed to load dashboard Data");
+      toast.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -23,24 +37,21 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-blue-200 rounded-full mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your dashboard...</p>
-        </div>
+      <div className="flex justify-center items-center min-h-screen bg-[#0f1217]">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-yellow-500 border-b-transparent"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="text-center p-6 bg-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg">
-          <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <p className="text-red-500 text-xl font-medium">No data available</p>
-          <button 
+      <div className="flex justify-center items-center min-h-screen bg-[#0f1217]">
+        <div className="p-6 bg-[#1a1d23] border border-red-600 rounded-xl text-center">
+          <div className="text-red-500 text-6xl mb-3">⚠️</div>
+          <p className="text-red-400 text-lg font-semibold">No Data Available</p>
+          <button
             onClick={fetchDashboardData}
-            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            className="mt-4 bg-yellow-500 text-black px-6 py-2 rounded-lg font-semibold hover:bg-yellow-400"
           >
             Try Again
           </button>
@@ -50,82 +61,86 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      {/* Header */}
-      <div className="mb-6 transform transition-all duration-300 hover:scale-105">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">
-          Dashboard Overview
-        </h2>
-        <div className="w-20 h-1 bg-blue-500 mx-auto rounded-full"></div>
+    <div className="min-h-screen bg-[#0f1217] text-gray-200 p-6">
+
+      {/* HEADER */}
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-bold text-gray-100">Dashboard Overview</h2>
+        <div className="w-28 h-1 bg-yellow-500 mx-auto mt-3 rounded-full"></div>
       </div>
 
-      {/* User Info Card */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border-l-4 border-blue-500 transform transition-all duration-300 hover:shadow-xl">
-        <div className="flex items-center mb-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 transition-transform duration-300 hover:rotate-12">
-            <span className="text-2xl">👤</span>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-800">User Information</h3>
-        </div>
-        
+      {/* USER INFO */}
+      <div className="bg-[#1a1d23] border border-[#2a2e36] rounded-xl p-6 mb-8">
+        <h3 className="text-xl font-semibold text-yellow-500 flex items-center gap-2 mb-5">
+          <User className="w-6 h-6" />
+          User Information
+        </h3>
+
         <div className="space-y-3">
-          <div className="flex items-center p-3 bg-blue-50 rounded-lg transition-colors duration-200 hover:bg-blue-100">
-            <span className="font-medium text-gray-700 w-20">Name:</span>
-            <span className="text-gray-900">{data.user.name}</span>
+          <div className="flex items-center bg-[#161a20] border border-[#2a2e36] rounded-lg p-3">
+            <span className="w-24 text-gray-400">Name:</span>
+            <span className="text-gray-200">{data.user.name}</span>
           </div>
-          <div className="flex items-center p-3 bg-blue-50 rounded-lg transition-colors duration-200 hover:bg-blue-100">
-            <span className="font-medium text-gray-700 w-20">Email:</span>
-            <span className="text-gray-900">{data.user.email}</span>
+
+          <div className="flex items-center bg-[#161a20] border border-[#2a2e36] rounded-lg p-3">
+            <span className="w-24 text-gray-400">Email:</span>
+            <span className="text-gray-200">{data.user.email}</span>
           </div>
-          <div className="flex items-center p-3 bg-blue-50 rounded-lg transition-colors duration-200 hover:bg-blue-100">
-            <span className="font-medium text-gray-700 w-20">Shop:</span>
-            <span className="text-gray-900">{data.user.shopName}</span>
+
+          <div className="flex items-center bg-[#161a20] border border-[#2a2e36] rounded-lg p-3">
+            <span className="w-24 text-gray-400">Shop:</span>
+            <span className="text-gray-200">{data.user.shopName}</span>
           </div>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Total Items Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 transform transition-all duration-300 hover:shadow-xl hover:scale-105">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-lg font-semibold text-gray-700 mb-2">Total Items</h4>
-              <p className="text-3xl font-bold text-green-600">{data.stats.totalItems}</p>
-            </div>
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center transition-transform duration-300 hover:rotate-12">
-              <span className="text-2xl">📦</span>
-            </div>
+      {/* STATS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+
+        {/* TOTAL ITEMS */}
+        <div className="bg-[#1a1d23] border border-[#2a2e36] rounded-xl p-6 flex justify-between items-center hover:border-yellow-500 transition cursor-pointer">
+          <div>
+            <h4 className="text-lg font-semibold text-gray-300">Total Items</h4>
+            <p className="text-4xl font-bold text-yellow-500 mt-2">
+              {data.stats.totalItems}
+            </p>
           </div>
+          <Package className="w-14 h-14 text-yellow-500 opacity-80" />
         </div>
 
-        {/* Inactive Items Cards */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500 transform transition-all duration-300 hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-lg font-semibold text-gray-700 mb-2">Not Ordered (7 days)</h4>
-                <p className="text-2xl font-bold text-orange-600">{data.stats.notOrdered7}</p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center transition-transform duration-300 hover:rotate-12">
-                <span className="text-xl">⏰</span>
-              </div>
-            </div>
+        {/* NOT ORDERED: 7 DAYS */}
+        <div
+          className="bg-[#1a1d23] border border-orange-600 rounded-xl p-6 flex justify-between items-center hover:bg-[#221c15] hover:border-yellow-500 transition cursor-pointer"
+          onClick={() =>
+            navigate("/stocks", { state: { filterDays: 7 } })
+          }
+        >
+          <div>
+            <h4 className="text-lg font-semibold text-gray-300">
+              Not Ordered (7 days)
+            </h4>
+            <p className="text-4xl font-bold text-orange-500 mt-2">{not7}</p>
           </div>
+          <Clock className="w-14 h-14 text-orange-500" />
+        </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500 transform transition-all duration-300 hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-lg font-semibold text-gray-700 mb-2">Not Ordered (15 days)</h4>
-                <p className="text-2xl font-bold text-red-600">{data.stats.notOrdered15}</p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center transition-transform duration-300 hover:rotate-12">
-                <span className="text-xl">🚨</span>
-              </div>
-            </div>
+        {/* NOT ORDERED: 15 DAYS */}
+        <div
+          className="bg-[#1a1d23] border border-red-600 rounded-xl p-6 flex justify-between items-center hover:bg-[#221717] hover:border-yellow-500 transition cursor-pointer"
+          onClick={() =>
+            navigate("/stocks", { state: { filterDays: 15 } })
+          }
+        >
+          <div>
+            <h4 className="text-lg font-semibold text-gray-300">
+              Not Ordered (15 days)
+            </h4>
+            <p className="text-4xl font-bold text-red-500 mt-2">{not15}</p>
           </div>
+          <AlertTriangle className="w-14 h-14 text-red-500" />
         </div>
       </div>
+
     </div>
   );
 };

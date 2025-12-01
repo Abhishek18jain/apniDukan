@@ -5,39 +5,26 @@ import AddItem from "../components/AddItemModel";
 import formatDate from "../utlis/dateFormat";
 import { useNavigate } from "react-router-dom";
 
-
 const Inventory = () => {
-
-  // ==============================
-  // STATE
-  // ==============================
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [activeTick, setActiveTick] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showPopup , setShowPopup] = useState(false)
+  const [showPopup, setShowPopup] = useState(false);
 
-  // CATEGORY POPUP (edit/delete)
   const [catPopup, setCatPopup] = useState({ open: false, category: null });
   const [newCatName, setNewCatName] = useState("");
 
-  // ITEM POPUP (edit only)
   const [itemPopup, setItemPopup] = useState({ open: false, item: null });
   const [newItemName, setNewItemName] = useState("");
-  const [frequency, setFrequency] = useState("7");
 
   const longPressTimer = useRef(null);
 
-  // ==============================
-  // LOAD ALL ITEMS
-  // ==============================
   const loadItems = async () => {
-
     setLoading(true);
     try {
       const res = await axiosInstance.get("/inventory/show");
       setItems(res.data.data);
-     
     } catch {
       toast.error("Failed to load items");
     } finally {
@@ -49,9 +36,6 @@ const Inventory = () => {
     loadItems();
   }, []);
 
-  // ==============================
-  // UNIQUE CATEGORIES
-  // ==============================
   const uniqueCategories = [
     ...new Map(items.map((i) => [i.category._id, i.category])).values(),
   ];
@@ -62,70 +46,60 @@ const Inventory = () => {
     }
   }, [uniqueCategories]);
 
-  // ==============================
-  // FILTER ITEMS BY CATEGORY
-  // ==============================
   const filteredItems = items.filter(
     (i) => i.category.name === selectedCategory
   );
 
-  // ==============================
-  // LONG PRESS HANDLERS
-  // ==============================
-  const startLongPress = (category) => {
+  const startLongPress = (cat) => {
     longPressTimer.current = setTimeout(() => {
-      setCatPopup({ open: true, category });
-      setNewCatName(category.name);
-    }, 1500);
+      setCatPopup({ open: true, category: cat });
+      setNewCatName(cat.name);
+    }, 1200);
   };
 
-  const cancelLongPress = () => {
-    clearTimeout(longPressTimer.current);
-  };
+  const cancelLongPress = () => clearTimeout(longPressTimer.current);
 
-  // ==============================
-  // CATEGORY OPERATIONS
-  // ==============================
   const deleteCategory = async () => {
-    const id = catPopup.category._id;
     try {
+      const id = catPopup.category._id;
+
       await axiosInstance.delete(`/categories/${id}`);
-      setItems((prev) => prev.filter((item) => item.category._id !== id));
+
+      setItems((prev) => prev.filter((i) => i.category._id !== id));
+
       toast.success("Category deleted");
       setCatPopup({ open: false, category: null });
     } catch {
-      toast.error("Failed to delete category");
+      toast.error("Failed");
     }
   };
 
   const saveCategoryEdit = async () => {
-    const id = catPopup.category._id;
     try {
+      const id = catPopup.category._id;
+
       await axiosInstance.put(`/categories/update/${id}`, {
         name: newCatName,
       });
 
       setItems((prev) =>
-        prev.map((item) =>
-          item.category._id === id
-            ? { ...item, category: { ...item.category, name: newCatName } }
-            : item
+        prev.map((i) =>
+          i.category._id === id
+            ? { ...i, category: { ...i.category, name: newCatName } }
+            : i
         )
       );
 
-      toast.success("Category updated");
+      toast.success("Updated");
       setCatPopup({ open: false, category: null });
     } catch {
-      toast.error("Failed to edit category");
+      toast.error("Failed");
     }
   };
 
-  // ==============================
-  // ITEM OPERATIONS
-  // ==============================
   const saveItemEdit = async () => {
-    const id = itemPopup.item._id;
     try {
+      const id = itemPopup.item._id;
       await axiosInstance.put(`/inventory/update/${id}`, {
         itemName: newItemName,
       });
@@ -134,98 +108,87 @@ const Inventory = () => {
         prev.map((i) => (i._id === id ? { ...i, itemName: newItemName } : i))
       );
 
-      toast.success("Item updated");
+      toast.success("Updated");
       setItemPopup({ open: false, item: null });
     } catch {
-      toast.error("Failed to edit item");
+      toast.error("Failed");
     }
   };
 
   const handleTick = async (id) => {
     setActiveTick(id);
+
     try {
       const res = await axiosInstance.patch(`/inventory/${id}/date`);
       const updated = res.data.data;
 
       setItems((prev) =>
-        prev.map((item) =>
-          item._id === id
-            ? { ...item, lastOrdered: updated.lastOrdered }
-            : item
+        prev.map((i) =>
+          i._id === id ? { ...i, lastOrdered: updated.lastOrdered } : i
         )
       );
     } catch {
-      toast.error("Failed to update date");
+      toast.error("Failed to update");
     }
-    setTimeout(() => setActiveTick(null), 1000);
+
+    setTimeout(() => setActiveTick(null), 900);
   };
 
   const deleteItem = async (id) => {
-    const ok = window.confirm("Delete this item?");
-    if (!ok) return;
+    if (!window.confirm("Delete?")) return;
 
     try {
       await axiosInstance.delete(`/inventory/delete/${id}`);
       setItems((prev) => prev.filter((i) => i._id !== id));
-      toast.success("Item deleted");
+      toast.success("Deleted");
     } catch {
-      toast.error("Failed to delete item");
+      toast.error("Failed");
     }
   };
+
   const token = localStorage.getItem("token");
   const isLoggedIn = !!token;
   const navigate = useNavigate();
-    const [showLogin, setShowLoginPopup] = useState(false);
+  const [showLogin, setShowLoginPopup] = useState(false);
 
   const handleProtectedClick = (path) => {
-    if (!isLoggedIn) {
-      setShowLoginPopup(true);
-    
-    } else {
-      navigate(path);
-      
-    }
+    if (!isLoggedIn) setShowLoginPopup(true);
+    else navigate(path);
   };
 
-
-
-
-  // ==============================
-  // RENDER
-  // ==============================
+  // LOADING SCREEN — DARK THEME
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-blue-200 rounded-full mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading inventory...</p>
+      <div className="flex justify-center items-center min-h-screen bg-[#0f1217]">
+        <div className="text-gray-300 text-lg animate-pulse">
+          Loading inventory...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2">
-            {/* POPUP */}
-      {showLogin && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-sm text-center">
+    <div className="min-h-screen bg-[#0f1217] text-gray-200 p-4">
 
-            <p className="text-lg font-semibold mb-4 text-gray-800">
-              Please login first to access all the features
+      {/* LOGIN POPUP */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#1a1d23] border border-[#2a2e36] p-6 rounded-xl w-[90%] max-w-sm">
+            <p className="text-gray-200 text-lg mb-4 text-center">
+              Please login first
             </p>
 
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => navigate("/login")}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="px-5 py-2 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400"
               >
                 Login
               </button>
 
               <button
                 onClick={() => setShowLoginPopup(false)}
-                className="px-5 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition"
+                className="px-5 py-2 bg-[#2a2e36] text-gray-200 rounded-lg hover:bg-[#3a3e46]"
               >
                 Cancel
               </button>
@@ -233,198 +196,163 @@ const Inventory = () => {
           </div>
         </div>
       )}
-      {/* Header */}
-      <div className="mb-4 transform transition-all duration-300">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-1">
-          Inventory
-        </h2>
-        <div className="w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
+
+      {/* HEADER */}
+      <h2 className="text-2xl font-bold text-center text-gray-100 mb-3">
+        Inventory
+      </h2>
+
+      {/* BUTTONS */}
+      <div className="flex justify-center mb-5 gap-3">
+        <button
+          onClick={() => setShowPopup(true)}
+          className="px-4 py-2 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400"
+        >
+          + Add Item
+        </button>
+
+        <button
+          onClick={() => handleProtectedClick("/stocks")}
+          className="px-4 py-2 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400"
+        >
+          Stocks
+        </button>
       </div>
 
+      <AddItem show={showPopup} onClose={() => setShowPopup(false)} />
 
-      {/* Add Item Button */}
-     <div className="p-6 flex justify-center">
+      {/* MAIN CARD */}
+      <div className="bg-[#1a1d23] border border-[#2a2e36] rounded-xl overflow-hidden h-[70vh] flex">
 
-      <button
-        onClick={() => setShowPopup(true)}  
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-      >
-        Add Item
-      </button>
-                <button onClick={() => handleProtectedClick("/stocks")} className="bg-blue-600 ml-[1rem] text-white px-4 py-2 rounded-lg hover:bg-blue-700 ">Stocks</button>
-
-      <AddItem
-        show={showPopup}
-        onClose={() => setShowPopup(false)}
-       
-      />
-    </div>
-
-      {/* Main Content - Side by Side Columns */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-        <div className="flex flex-row h-[70vh]">
-          
-          {/* Left Column - Categories (Fixed Width) */}
-          <div className="w-2/5 border-r border-gray-200 bg-gray-50 flex flex-col">
-            <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center">
-                <span className="mr-1">📦</span>
-                Categories
-              </h3>
-              <p className="text-xs text-gray-600 mt-1">Tap to view items</p>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-2">
-              {uniqueCategories.map((cat, index) => (
-                <div
-                  key={cat._id}
-                  onMouseDown={() => startLongPress(cat)}
-                  onMouseUp={cancelLongPress}
-                  onTouchStart={() => startLongPress(cat)}
-                  onTouchEnd={cancelLongPress}
-                  onClick={() => setSelectedCategory(cat.name)}
-                  className={`p-3 mb-1 rounded-lg cursor-pointer transform transition-all duration-200 hover:scale-102 ${
-                    selectedCategory === cat.name
-                      ? "bg-blue-500 text-white shadow-md scale-102"
-                      : "bg-white text-gray-800 hover:bg-blue-50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm truncate">{cat.name}</span>
-                    {selectedCategory === cat.name && (
-                      <span className="text-xs bg-white text-blue-500 px-1 py-0.5 rounded-full animate-pulse">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* LEFT: CATEGORIES */}
+        <div className="w-1/3 border-r border-[#2a2e36] flex flex-col">
+          <div className="p-3 border-b border-[#2a2e36] text-gray-300">
+            <h3 className="font-semibold text-yellow-500">Categories</h3>
+            <p className="text-xs text-gray-400">Tap or long press</p>
           </div>
 
-          {/* Right Column - Items (Flexible Width) */}
-          <div className="w-3/5 flex flex-col">
-            <div className="p-3 border-b border-gray-200 flex-shrink-0">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center">
-                <span className="mr-1">🛍️</span>
-                <span className="truncate">{selectedCategory || "Select Category"}</span>
-              </h3>
-              <p className="text-xs text-gray-600 mt-1">
-                {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-
-            {filteredItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center flex-1 text-center p-4">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-2xl">📝</span>
-                </div>
-                <h4 className="text-base font-semibold text-gray-700 mb-1">No Items</h4>
-                <p className="text-gray-500 text-sm">Add items to this category</p>
+          <div className="flex-1 overflow-y-auto p-2">
+            {uniqueCategories.map((cat) => (
+              <div
+                key={cat._id}
+                onMouseDown={() => startLongPress(cat)}
+                onMouseUp={cancelLongPress}
+                onTouchStart={() => startLongPress(cat)}
+                onTouchEnd={cancelLongPress}
+                onClick={() => setSelectedCategory(cat.name)}
+                className={`p-3 mb-2 rounded-lg cursor-pointer border border-[#2a2e36] 
+                  ${
+                    selectedCategory === cat.name
+                      ? "bg-yellow-500 text-black"
+                      : "bg-[#161a20] text-gray-200 hover:bg-[#1d2229]"
+                  }`}
+              >
+                <span className="font-medium">{cat.name}</span>
               </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto p-2">
-                <div className="space-y-2">
-                  {filteredItems.map((item, index) => (
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT: ITEMS */}
+        <div className="w-2/3 flex flex-col">
+          <div className="p-3 border-b border-[#2a2e36]">
+            <h3 className="font-semibold text-yellow-500">{selectedCategory}</h3>
+            <p className="text-xs text-gray-400">
+              {filteredItems.length} item
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-2 space-y-2">
+            {filteredItems.map((item) => (
+              <div
+                key={item._id}
+                className="bg-[#161a20] border border-[#2a2e36] p-3 rounded-lg"
+              >
+                <div className="flex justify-between items-center">
+
+                  <label className="flex items-center space-x-3 flex-1 cursor-pointer">
                     <div
-                      key={item._id}
-                      className="bg-gray-50 rounded-lg p-3 border border-gray-200 transform transition-all duration-200 hover:scale-102"
+                      className={`w-5 h-5 border-2 rounded flex items-center justify-center
+                        ${
+                          activeTick === item._id
+                            ? "bg-yellow-500 border-yellow-500 text-black"
+                            : "border-gray-500"
+                        }`}
+                      onClick={() => handleTick(item._id)}
                     >
-                      <div className="flex items-center justify-between">
-                        {/* Checkbox and Item Name */}
-                        <label className="flex items-center space-x-2 cursor-pointer flex-1 min-w-0">
-                          <div className="relative flex-shrink-0">
-                            <input
-                              type="checkbox"
-                              checked={activeTick === item._id}
-                              onChange={() => handleTick(item._id)}
-                              className="hidden"
-                            />
-                            <div className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-200 ${
-                              activeTick === item._id
-                                ? "bg-green-500 border-green-500 scale-110"
-                                : "border-gray-400 hover:border-gray-600"
-                            }`}>
-                              {activeTick === item._id && (
-                                <span className="text-white text-xs font-bold animate-bounce">✓</span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Item Name */}
-                          <span className={`font-medium text-sm truncate flex-1 ${
-                            activeTick === item._id ? "text-green-600 line-through" : "text-gray-800"
-                          } transition-all duration-300`}>
-                            {item.itemName}
-                          </span>
-                        </label>
-
-                        {/* Action Buttons */}
-                        <div className="flex space-x-1 ml-2 flex-shrink-0">
-                          <button
-                            onClick={() => {
-                              setNewItemName(item.itemName);
-                              setItemPopup({ open: true, item });
-                            }}
-                            className="w-6 h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center transition-all duration-200 hover:bg-blue-200 text-xs"
-                            title="Edit item"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => deleteItem(item._id)}
-                            className="w-6 h-6 bg-red-100 text-red-600 rounded flex items-center justify-center transition-all duration-200 hover:bg-red-200 text-xs"
-                            title="Delete item"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Last Ordered Date */}
-                      <div className="mt-1 text-xs text-gray-500 flex items-center truncate">
-                        <span className="mr-1">📅</span>
-                        Last: {formatDate(item.lastOrdered)}
-                      </div>
+                      {activeTick === item._id && <span>✓</span>}
                     </div>
-                  ))}
+
+                    <span
+                      className={`text-sm font-medium truncate ${
+                        activeTick === item._id
+                          ? "line-through text-yellow-500"
+                          : "text-gray-200"
+                      }`}
+                    >
+                      {item.itemName}
+                    </span>
+                  </label>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setNewItemName(item.itemName);
+                        setItemPopup({ open: true, item });
+                      }}
+                      className="bg-yellow-500 text-black px-2 py-1 rounded text-xs hover:bg-yellow-400"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => deleteItem(item._id)}
+                      className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-500"
+                    >
+                      Del
+                    </button>
+                  </div>
                 </div>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  Last: {formatDate(item.lastOrdered)}
+                </p>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
 
-      {/* CATEGORY EDIT/DELETE MODAL */}
+      {/* CATEGORY MODAL */}
       {catPopup.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-4 max-w-xs w-full transform transition-all duration-300">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-              <span className="mr-2">📝</span>
-              Edit Category
-            </h3>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-[#1a1d23] p-5 border border-[#2a2e36] rounded-xl w-full max-w-xs">
+            <h3 className="text-yellow-500 font-semibold mb-3">Edit Category</h3>
+
             <input
               value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none mb-3 text-sm"
-              placeholder="Category name"
+              className="w-full p-2 bg-[#161a20] border border-[#2a2e36] rounded text-gray-200 outline-none"
             />
-            <div className="flex space-x-2">
+
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={saveCategoryEdit}
-                className="flex-1 bg-green-500 text-white py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-green-600 text-sm"
+                className="flex-1 bg-yellow-500 text-black py-2 rounded-lg"
               >
                 Save
               </button>
+
               <button
                 onClick={deleteCategory}
-                className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-red-600 text-sm"
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg"
               >
                 Delete
               </button>
+
               <button
                 onClick={() => setCatPopup({ open: false, category: null })}
-                className="flex-1 bg-gray-500 text-white py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-gray-600 text-sm"
+                className="flex-1 bg-[#2a2e36] text-gray-300 py-2 rounded-lg"
               >
                 Cancel
               </button>
@@ -433,30 +361,29 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* ITEM EDIT MODAL */}
+      {/* ITEM MODAL */}
       {itemPopup.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-4 max-w-xs w-full transform transition-all duration-300">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-              <span className="mr-2">✏️</span>
-              Edit Item
-            </h3>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-[#1a1d23] p-5 border border-[#2a2e36] rounded-xl max-w-xs w-full">
+            <h3 className="text-yellow-500 font-semibold mb-3">Edit Item</h3>
+
             <input
               value={newItemName}
               onChange={(e) => setNewItemName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none mb-3 text-sm"
-              placeholder="Item name"
+              className="w-full p-2 bg-[#161a20] border border-[#2a2e36] rounded text-gray-200 outline-none"
             />
-            <div className="flex space-x-2">
+
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={saveItemEdit}
-                className="flex-1 bg-green-500 text-white py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-green-600 text-sm"
+                className="flex-1 bg-yellow-500 text-black py-2 rounded-lg"
               >
                 Save
               </button>
+
               <button
                 onClick={() => setItemPopup({ open: false, item: null })}
-                className="flex-1 bg-gray-500 text-white py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-gray-600 text-sm"
+                className="flex-1 bg-[#2a2e36] text-gray-300 py-2 rounded-lg"
               >
                 Cancel
               </button>
@@ -464,8 +391,9 @@ const Inventory = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
 
-export default Inventory; 
+export default Inventory;

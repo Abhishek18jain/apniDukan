@@ -24,6 +24,7 @@ import BillDetails from "./pages/billDetails.jsx";
 import Customers from "./pages/customer.jsx";
 import CustomerDetail from "./pages/CustomerDetails.jsx";
 
+
 function App() {
   return (
     <Router>

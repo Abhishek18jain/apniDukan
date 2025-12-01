@@ -14,7 +14,7 @@ const InactivePage = () => {
     try {
       const res = await axiosInstance.get(`/inventory/not-ordered/${days}`);
       setItems(res.data.data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load inactive items");
     } finally {
       setLoading(false);
@@ -25,96 +25,127 @@ const InactivePage = () => {
     loadInactiveItems();
   }, [days]);
 
+  // 👉 NEW FUNCTION: update lastOrdered on click
+  const handleUpdate = async (id) => {
+    try {
+      await axiosInstance.patch(`/inventory/${id}/date`);
+
+      // Remove updated item from the inactive list
+      setItems(prev => prev.filter(i => i._id !== id));
+
+      toast.success("Item marked as ordered");
+    } catch {
+      toast.error("Failed to update item");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 p-4">
+    <div className="min-h-screen bg-[#0f1217] text-gray-200 p-5">
+
       {/* Header */}
-      <div className="mb-6 transform transition-all duration-300">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">
-          Inactive Items
-        </h2>
-        <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+      <div className="mb-6 text-center">
+        <h2 className="text-3xl font-bold text-gray-100">Inactive Items</h2>
+        <div className="w-24 h-1 bg-yellow-500 mx-auto mt-2 rounded-full"></div>
       </div>
 
-      {/* Filter Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 transform transition-all duration-300 hover:shadow-xl">
-        <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4 transition-transform duration-300 hover:rotate-12">
-              <span className="text-xl">⏰</span>
+      {/* Filter Card */}
+      <div className="bg-[#1a1d23] border border-[#2a2e36] rounded-xl p-5 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#161a20] border border-[#2a2e36] rounded-full flex items-center justify-center">
+              <span className="text-yellow-500 text-2xl">⏰</span>
             </div>
+
             <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-1">
-                Show items not ordered in last:
-              </label>
-              <p className="text-sm text-gray-500">Select time period to filter</p>
+              <p className="text-lg font-semibold text-gray-200">
+                Show items not ordered in:
+              </p>
+              <p className="text-sm text-gray-400">Select timeframe</p>
             </div>
           </div>
-          
-          <select 
-            value={days} 
+
+          <select
+            value={days}
             onChange={(e) => setDays(Number(e.target.value))}
-            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 outline-none bg-white shadow-sm"
+            className="px-4 py-2 bg-[#161a20] border border-[#2a2e36] rounded-lg text-gray-200 focus:ring-2 focus:ring-yellow-500"
           >
-            {daysOptions.map((m) => (
-              <option key={m} value={m}>
-                {m} Days
+            {daysOptions.map((d) => (
+              <option key={d} value={d} className="bg-[#1a1d23]">
+                {d} Days
               </option>
             ))}
           </select>
+
         </div>
       </div>
 
-      {/* Items List */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl">
+      {/* Items Card */}
+      <div className="bg-[#1a1d23] border border-[#2a2e36] rounded-xl p-6">
+
+        {/* Loading */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          <div className="flex justify-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-yellow-500 border-b-transparent"></div>
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 transform transition-all duration-500">
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 transition-transform duration-300 hover:scale-110">
-              <span className="text-4xl">🎉</span>
+          // NO ITEMS
+          <div className="text-center py-14">
+            <div className="w-24 h-24 bg-[#161a20] border border-[#2a2e36] rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-yellow-500 text-4xl">🎉</span>
             </div>
-            <h3 className="text-2xl font-bold text-green-600 mb-2">Great News!</h3>
-            <p className="text-gray-600 text-lg">
-              No inactive items older than {days} days
+
+            <h3 className="text-2xl font-bold text-yellow-500 mb-2">
+              All Good!
+            </h3>
+
+            <p className="text-gray-300 text-lg">
+              No inactive items older than {days} days.
             </p>
-            <p className="text-gray-500 mt-2">All items are being ordered regularly</p>
+            <p className="text-gray-500 mt-1">
+              Everything is being ordered on time.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between mb-4 p-3 bg-orange-50 rounded-lg">
-              <span className="font-semibold text-orange-800">
-                Found {items.length} inactive item{items.length !== 1 ? 's' : ''}
+          <>
+            {/* Summary */}
+            <div className="flex justify-between items-center bg-[#161a20] border border-[#2a2e36] px-4 py-3 rounded-lg mb-4">
+              <span className="font-semibold text-yellow-500">
+                {items.length} inactive item{items.length !== 1 ? "s" : ""}
               </span>
-              <span className="text-sm text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+
+              <span className="text-sm bg-yellow-500 text-black px-3 py-1 rounded-full font-medium">
                 {days} days
               </span>
             </div>
-            
-            {items.map((item, index) => (
-              <div 
-                key={item._id}
-                className="bg-gray-50 rounded-xl p-4 border-l-4 border-red-500 transform transition-all duration-300 hover:scale-105 hover:shadow-md"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800 text-lg mb-1">
+
+            {/* LIST */}
+            <div className="space-y-3">
+              {items.map((item, i) => (
+                <div
+                  key={item._id}
+                  onClick={() => handleUpdate(item._id)}
+                  className="bg-[#161a20] border border-red-600 rounded-xl p-4 flex items-center justify-between hover:border-yellow-500 transition-all duration-300 cursor-pointer"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <div>
+                    <h4 className="font-semibold text-lg text-gray-100">
                       {item.itemName}
                     </h4>
-                    <div className="flex items-center text-sm text-gray-600">
+
+                    <p className="text-sm text-gray-400 flex items-center">
                       <span className="mr-2">📅</span>
                       Last ordered: {formatDate(item.lastOrdered)}
-                    </div>
+                    </p>
                   </div>
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center ml-4 transition-transform duration-300 hover:rotate-12">
-                    <span className="text-red-500">⚠️</span>
+
+                  <div className="w-12 h-12 bg-[#1a1d23] border border-red-600 rounded-full flex items-center justify-center">
+                    <span className="text-red-500 text-xl">⚠️</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
