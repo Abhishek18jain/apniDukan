@@ -265,10 +265,20 @@ export default function BillCreate() {
               </div>
 
               <div className="text-right mr-3">
-                <div className="font-semibold text-yellow-300">
-                  ₹{it.amount || 0}
-                </div>
-                <div className="text-xs text-gray-400">row</div>
+               <input
+  type="number"
+  value={it.amount}
+  onChange={(e) => {
+    const val = Number(e.target.value || 0);
+    setItems(prev =>
+      prev.map(p => p.id === it.id ? { ...p, amount: val } : p)
+    );
+  }}
+  className="w-20 bg-transparent border-b border-gray-600 text-right text-yellow-300 outline-none"
+  style={{ appearance: "none" }}
+/>
+
+                {/* <div className="text-xs text-gray-400">row</div> */}
               </div>
 
               {highlightMode ? (
